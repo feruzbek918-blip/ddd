@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#07041a">
+<meta name="description" content="MORNINGSTAR — swing a star on a chain and smash the void. A neon arcade mini-game.">
+<title>Morningstar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Monoton&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!--BODY-->
+<div id="app">
+  <canvas id="game" aria-label="Morningstar playfield"></canvas>
+
+  <div id="hud" class="hud" hidden>
+    <div class="hud-top">
+      <div class="hud-score">
+        <div class="eyebrow">SCORE</div>
+        <div id="score" class="score">0</div>
+        <div class="best-line">BEST <span id="hudBest">0</span></div>
+        <div id="combo" class="combo">
+          <div id="comboMult" class="combo-mult">×2</div>
+          <div class="combo-meta">
+            <div id="comboCount" class="combo-count">3 HITS</div>
+            <div class="combo-track"><div id="comboFill" class="combo-fill"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="hud-mid">
+        <div id="waveLabel" class="wave-label">WAVE 1</div>
+        <div id="modLabel" class="mod-label" hidden></div>
+        <div id="bossBar" class="boss-bar" hidden>
+          <div id="bossName" class="boss-name"></div>
+          <div class="boss-track"><div id="bossFill" class="boss-fill"></div></div>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div id="hearts" class="hearts" aria-label="Lives"></div>
+        <div class="hud-buttons">
+          <button id="btnSound" class="icon-btn" type="button" aria-label="Toggle sound" title="Sound (M)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path class="snd-on" d="M4 9h4l5-4v14l-5-4H4z M16 8.5a5 5 0 0 1 0 7 M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="snd-off" d="M4 9h4l5-4v14l-5-4H4z M16 9l6 6 M22 9l-6 6"/></svg>
+          </button>
+          <button id="btnPause" class="icon-btn" type="button" aria-label="Pause" title="Pause (P / Esc)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14 M16 5v14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="powerups" class="powerups"></div>
+    <button id="btnNova" class="nova-btn" type="button" aria-label="Unleash Nova">
+      <svg viewBox="0 0 80 80" aria-hidden="true">
+        <circle class="nova-bg" cx="40" cy="40" r="34"/>
+        <circle id="novaRing" class="nova-ring" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/>
+        <path class="nova-star" d="M40 22 L44.5 35.5 L58 40 L44.5 44.5 L40 58 L35.5 44.5 L22 40 L35.5 35.5 Z"/>
+      </svg>
+      <span class="nova-label">NOVA</span>
+      <span class="nova-key">E</span>
+    </button>
+    <div id="toast" class="toast"></div>
+    <div id="hint" class="hint"></div>
+  </div>
+
+  <div id="banner" class="banner" aria-live="polite">
+    <div id="bannerTitle" class="banner-title"></div>
+    <div id="bannerSub" class="banner-sub"></div>
+  </div>
+
+  <section id="screenStart" class="screen screen-start">
+    <div class="start-card scrollable">
+      <h1 class="title" aria-label="Morningstar"><span class="title-glow" aria-hidden="true">MORNINGSTAR</span><span class="title-main" aria-hidden="true">MORNINGSTAR</span></h1>
+      <p class="tagline">Swing the star. Smash the void.</p>
+      <button id="btnPlay" class="btn btn-primary" type="button">PLAY</button>
+      <ul class="howto">
+        <li><b>MOVE</b><span><em class="k-desk">Mouse or WASD</em><em class="k-touch">Drag anywhere</em> — your star follows on its chain</span></li>
+        <li><b>SMASH</b><span>Only a <i class="hot">fast</i> star kills. Swing it in circles, snap it like a whip</span></li>
+        <li><b>FLING</b><span><em class="k-desk">Click / Space</em><em class="k-touch">Quick tap</em> — throw the star; it boomerangs back</span></li>
+        <li><b>NOVA</b><span><em class="k-desk">E / Right-click</em><em class="k-touch">Tap ✦</em> — when the meter is full, detonate it</span></li>
+      </ul>
+      <div class="start-foot">
+        <div class="records">
+          <span>BEST <b id="startBest">0</b></span>
+          <span>WAVE <b id="startWave">—</b></span>
+          <span>COMBO <b id="startCombo">—</b></span>
+        </div>
+        <div class="toggles">
+          <button id="tglSound" class="toggle" type="button" aria-pressed="true">SOUND <b>ON</b></button>
+          <button id="tglMusic" class="toggle" type="button" aria-pressed="true">MUSIC <b>ON</b></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenPause" class="screen screen-pause" hidden>
+    <div class="pause-card scrollable">
+      <h2 class="pause-title">PAUSED</h2>
+      <div class="pause-stats"><span>SCORE <b id="pauseScore">0</b></span><span>WAVE <b id="pauseWave">1</b></span></div>
+      <div class="stack">
+        <button id="btnResume" class="btn btn-primary" type="button">RESUME</button>
+        <button id="btnRestart" class="btn btn-ghost" type="button">RESTART</button>
+        <button id="btnQuit" class="btn btn-ghost" type="button">MAIN MENU</button>
+      </div>
+      <div class="toggles">
+        <button id="tglSound2" class="toggle" type="button" aria-pressed="true">SOUND <b>ON</b></button>
+        <button id="tglMusic2" class="toggle" type="button" aria-pressed="true">MUSIC <b>ON</b></button>
+      </div>
+      <p class="pause-help"><span class="k-desk">P / Esc resume · M mute</span><span class="k-touch">Tap resume to continue</span></p>
+    </div>
+  </section>
+
+  <section id="screenOver" class="screen screen-over" hidden>
+    <div class="letterbox top"></div>
+    <div class="letterbox bottom"></div>
+    <div class="replay-tag">
+      <span class="rec-dot"></span>
+      <span id="replayLabel">REPLAY</span>
+      <button id="btnReplaySwap" class="chip" type="button">Final moments</button>
+    </div>
+    <div id="overCard" class="over-card">
+      <div class="over-kicker">CORE DESTROYED</div>
+      <div id="overScore" class="over-score">0</div>
+      <div id="overBestLine" class="over-best">BEST 0</div>
+      <dl class="stats">
+        <div><dt>WAVE</dt><dd id="stWave">1</dd></div>
+        <div><dt>BEST COMBO</dt><dd id="stCombo">0</dd></div>
+        <div><dt>SMASHED</dt><dd id="stKills">0</dd></div>
+        <div><dt>TIME</dt><dd id="stTime">0:00</dd></div>
+      </dl>
+      <div class="over-actions">
+        <button id="btnRetry" class="btn btn-primary" type="button">PLAY AGAIN</button>
+        <button id="btnMenu" class="btn btn-ghost" type="button">MENU</button>
+      </div>
+      <div class="over-hint"><span class="k-desk">Enter or Space to play again</span><span class="k-touch">Tap play again</span></div>
+    </div>
+  </section>
+
+  <noscript><div class="noscript">MORNINGSTAR needs JavaScript to run.</div></noscript>
+</div>
+<!--/BODY-->
+<script src="js/util.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/player.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/bosses.js"></script>
+<script src="js/director.js"></script>
+<script src="js/replay.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/input.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

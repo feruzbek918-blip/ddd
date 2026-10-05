@@ -1,0 +1,14 @@
+{
+  "name": "morningstar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MORNINGSTAR: a neon arcade mini-game. Swing a star on a chain and smash the void.",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node tests/playthrough.cjs",
+    "test:dist": "node tests/playthrough.cjs dist/morningstar.html"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}
